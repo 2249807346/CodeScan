@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_scan -> selectedFragment = ScannerFragment()
                 R.id.navigation_history -> selectedFragment = HistoryFragment()
                 R.id.navigation_export -> selectedFragment = ExportFragment()
+                R.id.navigation_settings -> selectedFragment = SettingsFragment()
             }
             if (selectedFragment != null) {
                 supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()

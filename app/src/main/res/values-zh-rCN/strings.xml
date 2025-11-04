@@ -24,4 +24,12 @@
     <string name="button_cancel">算了</string>
     <string name="camera_permission_denied">想要相机权限</string>
     <string name="hint_remark">备注</string>
+    
+    <!-- Settings Page -->
+    <string name="title_settings">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_summary">更改应用程序语言</string>
+    <string name="language_default">系统默认</string>
+    <string name="language_en">English</string>
+    <string name="language_zh">中文</string>
 </resources>

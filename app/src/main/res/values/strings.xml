@@ -32,4 +32,12 @@
     <string name="button_cancel">Cancel</string>
     <string name="hint_remark">Remark</string>
 
+    <!-- Settings Page -->
+    <string name="title_settings">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_summary">Change the application language</string>
+    <string name="language_default">System Default</string>
+    <string name="language_en">English</string>
+    <string name="language_zh">中文</string>
+
 </resources>
