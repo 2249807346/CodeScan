@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class ScanResult(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val content: String,
+    val remark: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )

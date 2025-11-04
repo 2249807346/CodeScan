@@ -21,6 +21,7 @@
     <string name="button_save">Save</string>
     <string name="button_rescan">Rescan</string>
     <string name="toast_saved">Saved</string>
+    <string name="hint_remark_optional">Enter a remark (optional)</string>
 
     <!-- History Page -->
     <string name="dialog_title_select_action">Select Action</string>
@@ -29,5 +30,6 @@
     <string name="action_delete">Delete</string>
     <string name="action_export">Export</string>
     <string name="button_cancel">Cancel</string>
+    <string name="hint_remark">Remark</string>
 
 </resources>

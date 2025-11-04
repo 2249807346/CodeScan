@@ -17,7 +17,7 @@ class HistoryAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val contentTextView: TextView = view.findViewById(android.R.id.text1)
-        val timestampTextView: TextView = view.findViewById(android.R.id.text2)
+        val remarkTextView: TextView = view.findViewById(android.R.id.text2)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,7 +28,7 @@ class HistoryAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val scanResult = scanResults[position]
         holder.contentTextView.text = scanResult.content
-        holder.timestampTextView.text = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(scanResult.timestamp))
+        holder.remarkTextView.text = scanResult.remark ?: ""
 
         holder.itemView.setOnLongClickListener {
             val context = it.context

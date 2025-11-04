@@ -17,9 +17,11 @@
     <string name="action_export">导出</string>
     <string name="toast_generation_error">生成时出错：%1$s</string>
     <string name="toast_generic_error">出现错误：%1$s</string>
+    <string name="hint_remark_optional">输入备注（可选）</string>
     <string name="dialog_title_select_action">选取操作</string>
     <string name="dialog_title_edit_result">编辑扫描结果</string>
     <string name="action_edit">编辑</string>
     <string name="button_cancel">算了</string>
     <string name="camera_permission_denied">想要相机权限</string>
+    <string name="hint_remark">备注</string>
 </resources>

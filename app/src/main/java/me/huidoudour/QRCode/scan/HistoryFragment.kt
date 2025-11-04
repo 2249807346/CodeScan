@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -54,17 +55,29 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showEditDialog(scanResult: ScanResult) {
-        val editText = EditText(requireContext()).apply {
+        val context = requireContext()
+        val contentEditText = EditText(context).apply {
             setText(scanResult.content)
         }
+        val remarkEditText = EditText(context).apply {
+            setText(scanResult.remark)
+            hint = getString(R.string.hint_remark)
+        }
 
-        AlertDialog.Builder(requireContext())
+        val layout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(contentEditText)
+            addView(remarkEditText)
+        }
+
+        AlertDialog.Builder(context)
             .setTitle(getString(R.string.dialog_title_edit_result))
-            .setView(editText)
+            .setView(layout)
             .setPositiveButton(getString(R.string.button_save)) { _, _ ->
-                val newContent = editText.text.toString()
+                val newContent = contentEditText.text.toString()
+                val newRemark = remarkEditText.text.toString()
                 lifecycleScope.launch {
-                    db.scanResultDao().update(scanResult.copy(content = newContent))
+                    db.scanResultDao().update(scanResult.copy(content = newContent, remark = newRemark))
                     loadHistory()
                 }
             }

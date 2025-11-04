@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -94,12 +95,18 @@ class ScannerFragment : Fragment() {
     }
 
     private fun showConfirmationDialog(result: String) {
+        val remarkEditText = EditText(requireContext()).apply {
+            hint = getString(R.string.hint_remark_optional)
+        }
+
         AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.dialog_title_scan_result))
             .setMessage(result)
+            .setView(remarkEditText)
             .setPositiveButton(getString(R.string.button_save)) { _, _ ->
+                val remark = remarkEditText.text.toString()
                 lifecycleScope.launch {
-                    db.scanResultDao().insert(ScanResult(content = result))
+                    db.scanResultDao().insert(ScanResult(content = result, remark = remark))
                     requireActivity().runOnUiThread {
                         Toast.makeText(requireContext(), getString(R.string.toast_saved), Toast.LENGTH_SHORT).show()
                     }

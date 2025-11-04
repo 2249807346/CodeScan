@@ -7,6 +7,7 @@
     <string name="camera_permission_denied">Camera permission is required to scan codes.</string>
     <string name="action_export">Export</string>
     <string name="button_cancel">Cancel</string>
+    <string name="hint_remark_optional">Enter a remark (optional)</string>
     <string name="dialog_title_select_action">Select Action</string>
     <string name="dialog_title_edit_result">Edit Scan Result</string>
     <string name="action_edit">Edit</string>
@@ -22,4 +23,5 @@
     <string name="button_save">Save</string>
     <string name="button_rescan">Rescan</string>
     <string name="toast_saved">Saved</string>
+    <string name="hint_remark">Remark</string>
 </resources>
