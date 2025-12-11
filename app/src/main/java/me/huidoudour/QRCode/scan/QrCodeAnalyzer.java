@@ -14,7 +14,7 @@ public class QrCodeAnalyzer implements ImageAnalysis.Analyzer {
 
     @FunctionalInterface
     public interface OnQrCodeScanned {
-        void onScanned(String result);
+        void onScanned(String result, String codeType);
     }
 
     private final OnQrCodeScanned onQrCodeScanned;
@@ -66,6 +66,42 @@ public class QrCodeAnalyzer implements ImageAnalysis.Analyzer {
     }
 
     /**
+     * 获取条形码类型名称
+     */
+    private String getBarcodeTypeName(int format) {
+        switch (format) {
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_128:
+                return "CODE_128";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_39:
+                return "CODE_39";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODE_93:
+                return "CODE_93";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_CODABAR:
+                return "CODABAR";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_DATA_MATRIX:
+                return "DATA_MATRIX";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13:
+                return "EAN_13";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_8:
+                return "EAN_8";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_ITF:
+                return "ITF";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_QR_CODE:
+                return "QR_CODE";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_A:
+                return "UPC_A";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_E:
+                return "UPC_E";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_PDF417:
+                return "PDF417";
+            case com.google.mlkit.vision.barcode.common.Barcode.FORMAT_AZTEC:
+                return "AZTEC";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    /**
      * 检查条形码是否在扫描框范围内
      */
     private boolean isBarcodeInScanFrame(Barcode barcode) {
@@ -114,7 +150,9 @@ public class QrCodeAnalyzer implements ImageAnalysis.Analyzer {
                         if (!barcodes.isEmpty() && barcodes.get(0).getRawValue() != null) {
                             // 检查条形码是否在扫描框范围内
                             if (isBarcodeInScanFrame(barcodes.get(0))) {
-                                onQrCodeScanned.onScanned(barcodes.get(0).getRawValue());
+                                Barcode barcode = barcodes.get(0);
+                                String codeType = getBarcodeTypeName(barcode.getFormat());
+                                onQrCodeScanned.onScanned(barcode.getRawValue(), codeType);
                             }
                         }
                     })

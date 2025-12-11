@@ -38,6 +38,16 @@
             android:ellipsize="end"
             android:visibility="gone" />
 
+        <!-- Code Type -->
+        <TextView
+            android:id="@+id/codeTypeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+            android:textColor="?attr/colorPrimary"
+            android:maxLines="1" />
+
         <!-- Timestamp -->
         <TextView
             android:id="@+id/timestampTextView"

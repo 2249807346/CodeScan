@@ -17,6 +17,7 @@ class HistoryAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val contentTextView: TextView = view.findViewById(R.id.contentTextView)
         val remarkTextView: TextView = view.findViewById(R.id.remarkTextView)
+        val codeTypeTextView: TextView = view.findViewById(R.id.codeTypeTextView)
         val timestampTextView: TextView = view.findViewById(R.id.timestampTextView)
     }
 
@@ -36,6 +37,15 @@ class HistoryAdapter(
         } else {
             holder.remarkTextView.visibility = View.GONE
         }
+        
+        // 设置码类型
+        val codeTypeDisplay = when (scanResult.codeType) {
+            "QR_CODE" -> "二维码"
+            "CODE_128", "CODE_39", "CODE_93", "EAN_13", "EAN_8", "UPC_A", "UPC_E", "CODABAR", "ITF" -> "条形码 (${scanResult.codeType})"
+            "DATA_MATRIX", "AZTEC", "PDF417" -> "特殊码 (${scanResult.codeType})"
+            else -> scanResult.codeType
+        }
+        holder.codeTypeTextView.text = codeTypeDisplay
         
         // 格式化时间戳
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())

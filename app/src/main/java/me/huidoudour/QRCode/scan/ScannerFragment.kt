@@ -79,11 +79,11 @@ class ScannerFragment : Fragment() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
-            val qrCodeAnalyzer = QrCodeAnalyzer { result ->
+            val qrCodeAnalyzer = QrCodeAnalyzer { result, codeType ->
                 if (isScanning) {
                     isScanning = false
                     requireActivity().runOnUiThread {
-                        showConfirmationDialog(result)
+                        showConfirmationDialog(result, codeType)
                     }
                 }
             }
@@ -120,7 +120,7 @@ class ScannerFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun showConfirmationDialog(result: String) {
+    private fun showConfirmationDialog(result: String, codeType: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_scan_result, null)
         val textInputLayout = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
         val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)
@@ -134,7 +134,7 @@ class ScannerFragment : Fragment() {
             .setPositiveButton(getString(R.string.button_save)) { dialog, _ ->
                 val remark = remarkEditText.text.toString()
                 lifecycleScope.launch {
-                    db.scanResultDao().insert(ScanResult(content = result, remark = remark, timestamp = System.currentTimeMillis()))
+                    db.scanResultDao().insert(ScanResult(content = result, remark = remark, codeType = codeType, timestamp = System.currentTimeMillis()))
                     requireActivity().runOnUiThread {
                         Toast.makeText(requireContext(), getString(R.string.toast_saved), Toast.LENGTH_SHORT).show()
                     }

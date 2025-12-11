@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [ScanResult::class], version = 2, exportSchema = false)
+@Database(entities = [ScanResult::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scanResultDao(): ScanResultDao
 
@@ -21,6 +21,27 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 添加 codeType 列
+                db.execSQL("ALTER TABLE scan_results ADD COLUMN codeType TEXT NOT NULL DEFAULT 'UNKNOWN'")
+                
+                // 根据内容推断码类型：
+                // QR码通常较长且包含多种字符
+                // EAN-13 是12-13位数字
+                // 其他纯数字可能是条形码
+                db.execSQL("""
+                    UPDATE scan_results SET codeType = CASE
+                        WHEN length(content) = 12 AND content GLOB '[0-9]*' THEN 'EAN_13'
+                        WHEN length(content) = 13 AND content GLOB '[0-9]*' THEN 'EAN_13'
+                        WHEN length(content) >= 20 AND content NOT GLOB '[0-9]*' THEN 'QR_CODE'
+                        WHEN length(content) BETWEEN 8 AND 20 AND content GLOB '[0-9]*' THEN 'CODE_128'
+                        ELSE 'UNKNOWN'
+                    END
+                """)
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -28,7 +49,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "scan_database"
                 )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 INSTANCE = instance
                 instance

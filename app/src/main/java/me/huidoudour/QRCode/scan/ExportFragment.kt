@@ -73,25 +73,54 @@ class ExportFragment : Fragment() {
             return
         }
 
-        if (requiredLength > 0 && text.length != requiredLength) {
-            Toast.makeText(requireContext(), R.string.toast_ean13_length_error, Toast.LENGTH_SHORT).show()
-            return
+        // EAN-13 的事前验证
+        if (format == BarcodeFormat.EAN_13) {
+            val (isValid, message) = validateEan13(text)
+            if (!isValid) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                return
+            }
         }
 
         try {
             val multiFormatWriter = MultiFormatWriter()
-            // For EAN_13, ZXing automatically calculates the checksum for 12-digit input
             val bitMatrix = multiFormatWriter.encode(text, format, 400, 200)
             val barcodeEncoder = BarcodeEncoder()
             val bitmap: Bitmap = barcodeEncoder.createBitmap(bitMatrix)
             binding.generatedCode.setImageBitmap(bitmap)
         } catch (e: WriterException) {
             e.printStackTrace()
-            Toast.makeText(requireContext(), getString(R.string.toast_generation_error, e.message), Toast.LENGTH_LONG).show()
+            // 如果是 EAN-13 失败且不符合规范，提示用户或自动降级到二维码
+            if (format == BarcodeFormat.EAN_13) {
+                val errorMsg = when {
+                    text.length != 12 && text.length != 13 -> 
+                        "EAN-13 条形码需要 12 位数字，你的数据是 ${text.length} 位。该内容无法生成标准 EAN-13 条形码，请尝试：\n1. 调整内容为 12 位数字\n2. 改用二维码生成"
+                    text.any { !it.isDigit() } -> 
+                        "EAN-13 条形码只支持数字（0-9），你的内容包含非数字字符。请尝试：\n1. 删除非数字字符\n2. 改用二维码生成"
+                    else -> "无法生成 EAN-13 条形码：${e.message}\n请尝试改用二维码生成"
+                }
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+            } else {
+                val errorMsg = e.message ?: "生成条形码失败"
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+            }
         } catch (e: IllegalArgumentException) {
-            // ZXing throws this for invalid EAN-13 content
             e.printStackTrace()
-            Toast.makeText(requireContext(), getString(R.string.toast_generic_error, e.message), Toast.LENGTH_LONG).show()
+            val errorMsg = when {
+                format == BarcodeFormat.EAN_13 -> "EAN-13 条形码格式不有效。请尝试：\n1. 确保输入的是 12 位有效数字\n2. 改用二维码生成"
+                else -> e.message ?: "输入格式错误"
+            }
+            Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun validateEan13(text: String): Pair<Boolean, String> {
+        return when {
+            text.length != 12 && text.length != 13 -> 
+                Pair(false, "条形码数据不符合规范\n\nEAN-13 需要正好 12 位数字，你的是 ${text.length} 位\n\n能否撤改或选择使用二维码来存储这个内容？")
+            text.any { !it.isDigit() } -> 
+                Pair(false, "条形码数据不符合规范\n\nEAN-13 只能使用 0-9 数字，你的数据包含其他字符\n\n能否需要改用二维码来存储这个内容？")
+            else -> Pair(true, "")
         }
     }
 
