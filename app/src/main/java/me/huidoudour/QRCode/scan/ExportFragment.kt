@@ -46,7 +46,7 @@ class ExportFragment : Fragment() {
 
         // 设置工具栏导航图标点击事件
         binding.toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
         arguments?.getString("content_to_export")?.let {

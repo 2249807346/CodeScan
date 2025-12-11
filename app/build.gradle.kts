@@ -22,14 +22,46 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 多架构配置
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
+    // 配置输出文件名称
+    bundle {
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = false
+        }
+    }
+
+
+
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+        }
+    }
+    packaging {
+        // 支持 16 KB 页面大小的 ARM 二进制文件对齐
+        resources.pickFirsts += "lib/arm64-v8a/libbarhopper_v3.so"
+        resources.pickFirsts += "lib/arm64-v8a/libimage_processing_util_jni.so"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

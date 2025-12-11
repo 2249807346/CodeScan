@@ -14,3 +14,7 @@
 .cxx
 local.properties
 log.txt
+/BUILD_VARIANTS.md
+/IMPROVEMENTS.md
+/QUICK_START.md
+/.kotlin/app-debug.apk

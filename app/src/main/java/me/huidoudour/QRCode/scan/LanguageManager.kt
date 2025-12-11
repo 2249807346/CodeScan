@@ -9,12 +9,21 @@ import java.util.*
 
 class LanguageManager {
     companion object {
+        // 支持的语言列表
+        const val LANGUAGE_SYSTEM = ""
+        const val LANGUAGE_ENGLISH = "en"
+        const val LANGUAGE_CHINESE = "zh"
+        
         fun setLocale(context: Context, languageCode: String): Context {
             return if (languageCode.isEmpty()) {
                 // 使用系统默认语言
                 updateResources(context, Locale.getDefault())
             } else {
-                val locale = Locale(languageCode)
+                val locale = when (languageCode) {
+                    LANGUAGE_ENGLISH -> Locale("en")
+                    LANGUAGE_CHINESE -> Locale("zh")
+                    else -> Locale.getDefault()
+                }
                 updateResources(context, locale)
             }
         }
@@ -49,6 +58,22 @@ class LanguageManager {
         fun getCurrentLanguage(context: Context): String {
             val sharedPref = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
             return sharedPref.getString("language_preference", "") ?: ""
+        }
+        
+        fun saveLanguage(context: Context, languageCode: String) {
+            val sharedPref = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putString("language_preference", languageCode)
+                apply()
+            }
+        }
+        
+        fun getAvailableLanguages(): List<Pair<String, String>> {
+            return listOf(
+                Pair("", "System Default"),
+                Pair(LANGUAGE_ENGLISH, "English"),
+                Pair(LANGUAGE_CHINESE, "中文")
+            )
         }
     }
 }

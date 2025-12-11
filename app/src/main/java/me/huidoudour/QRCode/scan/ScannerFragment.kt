@@ -79,14 +79,37 @@ class ScannerFragment : Fragment() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
-            imageAnalysis.setAnalyzer(cameraExecutor, QrCodeAnalyzer { result ->
+            val qrCodeAnalyzer = QrCodeAnalyzer { result ->
                 if (isScanning) {
                     isScanning = false
                     requireActivity().runOnUiThread {
                         showConfirmationDialog(result)
                     }
                 }
-            })
+            }
+
+            // 计算扫描框的坐标
+            // 由于 ML Kit 的条形码坐标已经在图像坐标系中，
+            // 我们需要根据预览和图像尺寸的比例来设置扫描框边界
+            binding.previewView.post {
+                val previewWidth = binding.previewView.width
+                val previewHeight = binding.previewView.height
+                val scanFrameSize = 280 // 扫描框大小（dp）
+                val scanFrameSizePx = (scanFrameSize * requireContext().resources.displayMetrics.density).toInt()
+
+                // 计算扫描框在预览视图中的位置（中央）
+                val previewLeft = (previewWidth - scanFrameSizePx) / 2f
+                val previewTop = (previewHeight - scanFrameSizePx) / 2f
+                val previewRight = previewLeft + scanFrameSizePx
+                val previewBottom = previewTop + scanFrameSizePx
+
+                // 设置预览坐标的扫描框边界
+                qrCodeAnalyzer.setScanFrameBounds(previewLeft, previewTop, previewRight, previewBottom)
+                // 设置预览视图大小
+                qrCodeAnalyzer.setPreviewSize(previewWidth.toFloat(), previewHeight.toFloat())
+            }
+
+            imageAnalysis.setAnalyzer(cameraExecutor, qrCodeAnalyzer)
 
             try {
                 cameraProvider.unbindAll()

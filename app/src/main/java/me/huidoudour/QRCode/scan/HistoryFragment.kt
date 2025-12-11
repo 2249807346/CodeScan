@@ -59,7 +59,6 @@ class HistoryFragment : Fragment() {
 
     private fun showEditDialog(scanResult: ScanResult) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_result, null)
-        val contentInputLayout = dialogView.findViewById<TextInputLayout>(R.id.contentInputLayout)
         val contentEditText = dialogView.findViewById<TextInputEditText>(R.id.contentEditText)
         val remarkInputLayout = dialogView.findViewById<TextInputLayout>(R.id.remarkInputLayout)
         val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)

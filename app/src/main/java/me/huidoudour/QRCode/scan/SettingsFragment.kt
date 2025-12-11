@@ -1,12 +1,10 @@
 package me.huidoudour.QRCode.scan
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.huidoudour.QRCode.scan.databinding.FragmentSettingsBinding
@@ -41,12 +39,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun getCurrentLanguage(): String {
-        val sharedPref = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        val languageCode = sharedPref.getString("language_preference", "") ?: ""
+        val languageCode = LanguageManager.getCurrentLanguage(requireActivity())
         
         return when (languageCode) {
-            "en" -> getString(R.string.language_en)
-            "zh" -> getString(R.string.language_zh)
+            LanguageManager.LANGUAGE_ENGLISH -> getString(R.string.language_en)
+            LanguageManager.LANGUAGE_CHINESE -> getString(R.string.language_zh)
             else -> getString(R.string.language_default)
         }
     }
@@ -58,12 +55,11 @@ class SettingsFragment : Fragment() {
             getString(R.string.language_zh)
         )
         
-        val sharedPref = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        val currentLanguageCode = sharedPref.getString("language_preference", "") ?: ""
+        val currentLanguageCode = LanguageManager.getCurrentLanguage(requireActivity())
         
         val selectedIndex = when (currentLanguageCode) {
-            "en" -> 1
-            "zh" -> 2
+            LanguageManager.LANGUAGE_ENGLISH -> 1
+            LanguageManager.LANGUAGE_CHINESE -> 2
             else -> 0
         }
         
@@ -71,9 +67,9 @@ class SettingsFragment : Fragment() {
             .setTitle(R.string.settings_language)
             .setSingleChoiceItems(languages, selectedIndex) { dialog, which ->
                 when (which) {
-                    0 -> setLanguage("")
-                    1 -> setLanguage("en")
-                    2 -> setLanguage("zh")
+                    0 -> setLanguage(LanguageManager.LANGUAGE_SYSTEM)
+                    1 -> setLanguage(LanguageManager.LANGUAGE_ENGLISH)
+                    2 -> setLanguage(LanguageManager.LANGUAGE_CHINESE)
                 }
                 dialog.dismiss()
             }
@@ -86,11 +82,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setLanguage(languageCode: String) {
-        val sharedPref = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putString("language_preference", languageCode)
-            apply()
-        }
+        LanguageManager.saveLanguage(requireActivity(), languageCode)
         
         // 更新显示
         updateLanguageDisplay()

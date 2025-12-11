@@ -34,6 +34,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Navigation bar text color for light theme - use dark text -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
         <!-- Material 3 specific attributes -->
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
