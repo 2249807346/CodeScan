@@ -14,7 +14,7 @@
 <br>
 [![主要语言](https://img.shields.io/github/languages/top/huidoudour/CodeScan)]()
 <br>
-[![AI Assisted](https://img.shields.io/badge/AI-Assisted-blue.svg)](https://github.com/huidoudour/Installer)
+[![AI Assisted](https://img.shields.io/badge/AI-Assisted-blue.svg)](https://github.com/huidoudour/CodeScan)
 
 
 ## 部分设计参考和依赖
