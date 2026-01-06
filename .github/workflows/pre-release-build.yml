@@ -15,6 +15,11 @@ on:
         required: false
         type: string
         default: 'Pre-Release'
+      update_existing:
+        description: 'Update existing release if tag already exists'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -76,25 +81,33 @@ jobs:
           fi
           echo "TAG_NAME=$tag" >> $GITHUB_ENV
 
-      - name: Create Pre-Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          name: ${{ github.event.inputs.release_title || 'Pre-Release ${{ env.TAG_NAME }}' }}
-          draft: false
-          prerelease: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            ## Pre-Release Notes
-            This is a pre-release version for testing purposes.
-            
-            ### APK Files:
-            - The universal APK supports all architectures
-            - Architecture-specific APKs are also provided for smaller download sizes
-            
-            ### Notes:
-            - This version may contain bugs not present in the stable release
-            - Feedback is welcome via the repository's issue tracker
+      - name: Check if tag exists and create/update pre-release
+        run: |
+          # 检查标签是否已存在
+          if gh release view ${{ env.TAG_NAME }} --json tagName > /dev/null 2>&1; then
+            if [[ "${{ github.event.inputs.update_existing }}" == "true" ]]; then
+              echo "Tag ${{ env.TAG_NAME }} already exists, updating pre-release..."
+              # 更新现有预发布
+              gh release edit ${{ env.TAG_NAME }} \
+                --title "${{ github.event.inputs.release_title || 'Pre-Release ${{ env.TAG_NAME }}' }}" \
+                --notes "## Pre-Release Notes\nThis is a pre-release version for testing purposes.\n\n### APK Files:\n- The universal APK supports all architectures\n- Architecture-specific APKs are also provided for smaller download sizes\n\n### Notes:\n- This version may contain bugs not present in the stable release\n- Feedback is welcome via the repository's issue tracker" \
+                --draft=false \
+                --prerelease=true
+            else
+              echo "Error: Tag ${{ env.TAG_NAME }} already exists and update_existing is false."
+              exit 1
+            fi
+          else
+            echo "Tag ${{ env.TAG_NAME }} does not exist, creating new pre-release..."
+            # 创建新预发布
+            gh release create ${{ env.TAG_NAME }} \
+              --title "${{ github.event.inputs.release_title || 'Pre-Release ${{ env.TAG_NAME }}' }}" \
+              --notes "## Pre-Release Notes\nThis is a pre-release version for testing purposes.\n\n### APK Files:\n- The universal APK supports all architectures\n- Architecture-specific APKs are also provided for smaller download sizes\n\n### Notes:\n- This version may contain bugs not present in the stable release\n- Feedback is welcome via the repository's issue tracker" \
+              --draft=false \
+              --prerelease=true
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload APKs to Release
         run: |

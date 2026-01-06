@@ -53,27 +53,28 @@ jobs:
           echo "tag_name=Schedule-Build" >> $GITHUB_OUTPUT
           echo "release_name=Debug Build - Scheduled" >> $GITHUB_OUTPUT
 
-      - name: Create or Update Pre-Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.tag.outputs.tag_name }}
-          name: ${{ steps.tag.outputs.release_name }}
-          draft: false
-          prerelease: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            ## Scheduled Debug Build
-            This is an automatically generated debug build from the latest commit.
-            
-            **Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')
-            **Commit SHA:** ${{ github.sha }}
-            
-            ### Notes:
-            - This is a debug build with additional logging
-            - Not optimized for performance or size
-            - Intended for testing purposes only
-            - This release uses a fixed tag "Schedule-Build" and gets updated every 3 days
-          make_latest: false
+      - name: Check if tag exists and create/update pre-release
+        run: |
+          # 检查标签是否已存在
+          if gh release view ${{ steps.tag.outputs.tag_name }} --json tagName > /dev/null 2>&1; then
+            echo "Tag ${{ steps.tag.outputs.tag_name }} already exists, updating pre-release..."
+            # 更新现有预发布
+            gh release edit ${{ steps.tag.outputs.tag_name }} \
+              --title "${{ steps.tag.outputs.release_name }}" \
+              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"Schedule-Build\" and gets updated every 3 days" \
+              --draft=false \
+              --prerelease=true
+          else
+            echo "Tag ${{ steps.tag.outputs.tag_name }} does not exist, creating new pre-release..."
+            # 创建新预发布
+            gh release create ${{ steps.tag.outputs.tag_name }} \
+              --title "${{ steps.tag.outputs.release_name }}" \
+              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"Schedule-Build\" and gets updated every 3 days" \
+              --draft=false \
+              --prerelease=true
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Debug APKs to Release
         run: |
