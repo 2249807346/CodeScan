@@ -10,7 +10,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSurface"
-            android:elevation="0dp">
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            app:liftOnScroll="false">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -53,6 +55,7 @@
                 android:layout_height="120dp"
                 android:src="@drawable/ic_history"
                 android:tint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/title_history"
                 app:shapeAppearance="@style/ShapeAppearance.Material3.LargeComponent"
                 app:strokeColor="?attr/colorOutline"
                 app:strokeWidth="1dp" />
@@ -61,7 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="暂无扫描记录"
+                android:text="@string/no_scan_records"
                 android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
                 android:textColor="?attr/colorOnSurface" />
 

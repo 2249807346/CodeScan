@@ -16,6 +16,7 @@
     <string name="scanner_instruction_position">将二维码或条形码置于框内</string>
     <string name="history_empty_hint">开始扫描二维码或条形码来创建记录</string>
     <string name="toast_ean13_length_error">必须输入EAN-13 标准的序列</string>
+    <string name="no_scan_records">暂无扫描记录</string>
     <string name="title_scan">扫描</string>
     <string name="title_history">记录</string>
     <string name="title_export">导出</string>
@@ -46,4 +47,6 @@
     <string name="about_features">支持二维码、EAN-13、CODE-128 等多种格式</string>
     <string name="about_developer">亻尔女子，我是huidoudour（慧兜兜）</string>
     <string name="visit_github">ω寻找我ω</string>
+    <string name="generated_qr_code">生成的二维码</string>
+    <string name="hello_world">Hello World!</string>
 </resources>
