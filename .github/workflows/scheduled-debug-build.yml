@@ -2,8 +2,8 @@ name: Scheduled Debug Build and Pre-Release
 
 on:
   schedule:
-    # 每三天执行一次，UTC时间每天的2点执行（北京时间上午10点）
-    - cron: '0 2 */3 * *'
+    # 每三天执行一次，UTC时间每天的4点执行（北京时间中午12点）
+    - cron: '0 4 */3 * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
@@ -47,10 +47,10 @@ jobs:
         if: always()
         run: rm -f sign_key
 
-      - name: Set fixed tag name
+      - name: Generate date-based tag
         id: tag
         run: |
-          echo "tag_name=Schedule-Build" >> $GITHUB_OUTPUT
+          echo "tag_name=debug-$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
           echo "release_name=Debug Build - Scheduled" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists and create/update pre-release
@@ -61,7 +61,7 @@ jobs:
             # 更新现有预发布
             gh release edit ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"Schedule-Build\" and gets updated every 3 days" \
+              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a date-based tag and gets updated every 3 days" \
               --draft=false \
               --prerelease=true
           else
@@ -69,7 +69,7 @@ jobs:
             # 创建新预发布
             gh release create ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"Schedule-Build\" and gets updated every 3 days" \
+              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a date-based tag and gets updated every 3 days" \
               --draft=false \
               --prerelease=true
           fi
@@ -84,8 +84,8 @@ jobs:
             if [ -f "$apk" ]; then
               echo "Uploading $(basename "$apk")..."
               # 删除同名文件后再上传
-              gh release delete-asset "${{ steps.date.outputs.tag_name }}" "$(basename "$apk")" --yes || true
-              gh release upload "${{ steps.date.outputs.tag_name }}" "$apk"
+              gh release delete-asset "${{ steps.tag.outputs.tag_name }}" "$(basename "$apk")" --yes || true
+              gh release upload "${{ steps.tag.outputs.tag_name }}" "$apk"
             fi
           done
         env:

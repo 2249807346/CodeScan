@@ -1,18 +1,11 @@
 name: Pre-Release Build
 
 on:
-  push:
-    tags:
-      - 'v*-pre*'
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: 'Release tag (e.g., v1.0-pre)'
-        required: true
-        type: string
       release_title:
         description: 'Release title'
-        required: false
+        required: true
         type: string
         default: 'Pre-Release'
       update_existing:
@@ -62,14 +55,10 @@ jobs:
         if: always()
         run: rm -f sign_key
 
-      - name: Get tag name
+      - name: Generate date-based tag
         id: tag
         run: |
-          if [ "${{ github.event.inputs.release_tag }}" != "" ]; then
-            echo "tag_name=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
+          echo "tag_name=pre-$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
       - name: Validate and prepare release tag
         run: |
