@@ -1,4 +1,4 @@
-name: Scheduled Debug Build and Pre-Release
+name: Daily Build
 
 on:
   schedule:
@@ -47,11 +47,11 @@ jobs:
         if: always()
         run: rm -f sign_key
 
-      - name: Generate date-based tag
+      - name: Set fixed tag name
         id: tag
         run: |
-          echo "tag_name=debug-$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
-          echo "release_name=Debug Build - Scheduled" >> $GITHUB_OUTPUT
+          echo "tag_name=daily-build" >> $GITHUB_OUTPUT
+          echo "release_name=Daily Build" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists and create/update pre-release
         run: |
@@ -61,7 +61,7 @@ jobs:
             # 更新现有预发布
             gh release edit ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a date-based tag and gets updated every 3 days" \
+              --notes "## Daily Build\nThis is an automatically generated daily build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"daily-build\" and gets updated daily" \
               --draft=false \
               --prerelease=true
           else
@@ -69,7 +69,7 @@ jobs:
             # 创建新预发布
             gh release create ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes "## Scheduled Debug Build\nThis is an automatically generated debug build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a date-based tag and gets updated every 3 days" \
+              --notes "## Daily Build\nThis is an automatically generated daily build from the latest commit.\n\n**Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')\n**Commit SHA:** ${{ github.sha }}\n\n### Notes:\n- This is a debug build with additional logging\n- Not optimized for performance or size\n- Intended for testing purposes only\n- This release uses a fixed tag \"daily-build\" and gets updated daily" \
               --draft=false \
               --prerelease=true
           fi

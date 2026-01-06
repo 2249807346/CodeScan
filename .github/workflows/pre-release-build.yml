@@ -8,11 +8,6 @@ on:
         required: true
         type: string
         default: 'Pre-Release'
-      update_existing:
-        description: 'Update existing release if tag already exists'
-        required: false
-        type: boolean
-        default: true
 
 jobs:
   build:
