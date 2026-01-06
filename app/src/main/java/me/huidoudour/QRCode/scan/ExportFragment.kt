@@ -49,21 +49,21 @@ class ExportFragment : Fragment() {
         }
 
         binding.generateEan13Button.setOnClickListener {
-            generateCode(BarcodeFormat.EAN_13, 12)
+            generateCode(BarcodeFormat.EAN_13)
         }
         
         binding.generateCode128Button.setOnClickListener {
             binding.textInputLayout.hint = getString(R.string.hint_export_input_code128)
-            generateCode(BarcodeFormat.CODE_128, -1) // No length limit for CODE_128
+            generateCode(BarcodeFormat.CODE_128) // No length limit for CODE_128
         }
 
         binding.generateQrButton.setOnClickListener {
             binding.textInputLayout.hint = getString(R.string.hint_export_input_qr)
-            generateCode(BarcodeFormat.QR_CODE, -1) // No length limit for QR
+            generateCode(BarcodeFormat.QR_CODE) // No length limit for QR
         }
     }
 
-    private fun generateCode(format: BarcodeFormat, requiredLength: Int) {
+    private fun generateCode(format: BarcodeFormat) {
         val text = binding.inputText.text.toString()
         if (text.isEmpty()) {
             Toast.makeText(requireContext(), "请输入内容", Toast.LENGTH_SHORT).show()

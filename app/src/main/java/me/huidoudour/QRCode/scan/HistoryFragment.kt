@@ -166,7 +166,6 @@ class HistoryFragment : Fragment() {
     
     private fun showSecondConfirmDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_result, null)
-        val contentEditText = dialogView.findViewById<TextInputEditText>(R.id.contentEditText)
         val remarkInputLayout = dialogView.findViewById<TextInputLayout>(R.id.remarkInputLayout)
         val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)
         

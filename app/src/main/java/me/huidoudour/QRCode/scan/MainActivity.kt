@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateStatusBarStyle() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val isDarkMode = isDarkMode()
-            val insetsController = WindowCompat.getInsetsController(window, window.decorView)!!
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
             insetsController.isAppearanceLightStatusBars = !isDarkMode
             insetsController.isAppearanceLightNavigationBars = !isDarkMode
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
