@@ -66,7 +66,7 @@ class ExportFragment : Fragment() {
     private fun generateCode(format: BarcodeFormat) {
         val text = binding.inputText.text.toString()
         if (text.isEmpty()) {
-            Toast.makeText(requireContext(), "请输入内容", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.export_input_required), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -96,10 +96,10 @@ class ExportFragment : Fragment() {
             if (format == BarcodeFormat.EAN_13) {
                 val errorMsg = when {
                     text.length != 12 && text.length != 13 -> 
-                        "EAN-13 条形码需要 12 位数字，你的数据是 ${text.length} 位。该内容无法生成标准 EAN-13 条形码，请尝试：\n1. 调整内容为 12 位数字\n2. 改用 CODE-128 或二维码生成"
+                        getString(R.string.export_ean13_digit_count_error, text.length)
                     text.any { !it.isDigit() } -> 
-                        "EAN-13 条形码只支持数字（0-9），你的内容包含非数字字符。请尝试：\n1. 删除非数字字符\n2. 改用 CODE-128 或二维码生成"
-                    else -> "无法生成 EAN-13 条形码：${e.message}\n请尝试改用 CODE-128 或二维码生成"
+                        getString(R.string.export_ean13_digits_only_error)
+                    else -> getString(R.string.export_ean13_generation_failed, e.message)
                 }
                 Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
             } else {
@@ -109,7 +109,7 @@ class ExportFragment : Fragment() {
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
             val errorMsg = when {
-                format == BarcodeFormat.EAN_13 -> "EAN-13 条形码格式不有效。请尝试：\n1. 确保输入的是 12 位有效数字\n2. 改用 CODE-128 或二维码生成"
+                format == BarcodeFormat.EAN_13 -> getString(R.string.export_ean13_format_invalid)
                 else -> e.message ?: "输入格式错误"
             }
             Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
@@ -119,9 +119,9 @@ class ExportFragment : Fragment() {
     private fun validateEan13(text: String): Pair<Boolean, String> {
         return when {
             text.length != 12 && text.length != 13 -> 
-                Pair(false, "条形码数据不符合规范\n\nEAN-13 需要正好 12 位数字，你的是 ${text.length} 位\n\n能否撤改或选择使用二维码来存储这个内容？")
+                Pair(false, getString(R.string.export_ean13_validation_error_length, text.length))
             text.any { !it.isDigit() } -> 
-                Pair(false, "条形码数据不符合规范\n\nEAN-13 只能使用 0-9 数字，你的数据包含其他字符\n\n能否需要改用二维码来存储这个内容？")
+                Pair(false, getString(R.string.export_ean13_validation_error_chars))
             else -> Pair(true, "")
         }
     }

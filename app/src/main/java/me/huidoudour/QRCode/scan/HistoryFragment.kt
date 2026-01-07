@@ -149,8 +149,8 @@ class HistoryFragment : Fragment() {
     private fun showClearAllDialog() {
         // 第一级确认
         MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-            .setTitle("清空所有记录")
-            .setMessage("确定要删除所有扫描记录吗？此操作不可恢复。")
+            .setTitle(getString(R.string.history_clear_all_title))
+            .setMessage(getString(R.string.history_clear_all_message))
             .setPositiveButton("确定") { dialog, _ ->
                 dialog.dismiss()
                 // 显示第二级确认
@@ -173,12 +173,12 @@ class HistoryFragment : Fragment() {
         dialogView.findViewById<TextInputLayout>(R.id.contentInputLayout).visibility = View.GONE
         
         // 设置提示
-        remarkInputLayout.hint = "请输入 clear 确认"
+        remarkInputLayout.hint = getString(R.string.history_clear_confirmation_hint)
         remarkEditText.setText("")
         
         MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-            .setTitle("最终确认")
-            .setMessage("⚠️ 警告：此操作将永久删除所有扫描记录！\n\n这是不可恢复的操作，请谨慎确认。\n\n如需继续，请在下方输入框中输入 \"clear\" 后点击确定。")
+            .setTitle(getString(R.string.history_final_confirmation_title))
+            .setMessage(getString(R.string.history_final_confirmation_message))
             .setView(dialogView)
             .setPositiveButton("确定") { dialog, _ ->
                 val input = remarkEditText.text.toString().trim()
@@ -186,11 +186,11 @@ class HistoryFragment : Fragment() {
                     lifecycleScope.launch {
                         db.scanResultDao().deleteAll()
                         loadHistory()
-                        Toast.makeText(requireContext(), "已清空所有记录", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.history_cleared_success), Toast.LENGTH_SHORT).show()
                     }
                     dialog.dismiss()
                 } else {
-                    Toast.makeText(requireContext(), "输入不正确，清空操作已取消", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.history_clear_cancelled), Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
                 }
             }
@@ -208,7 +208,7 @@ class HistoryFragment : Fragment() {
                 val scanResults = db.scanResultDao().getAll()
                 
                 if (scanResults.isEmpty()) {
-                    Toast.makeText(requireContext(), "没有记录可导出", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.history_no_records_to_export), Toast.LENGTH_SHORT).show()
                     return@launch
                 }
                 
@@ -216,7 +216,7 @@ class HistoryFragment : Fragment() {
                 saveAndShareJson(json)
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(requireContext(), "导出失败：${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.history_export_failed, e.message), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -272,12 +272,12 @@ class HistoryFragment : Fragment() {
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     
-                    startActivity(Intent.createChooser(shareIntent, "导出记录"))
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.history_export_title)))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 launch(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "导出失败：${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.history_export_failed, e.message), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -341,13 +341,13 @@ class HistoryFragment : Fragment() {
                 }
                 
                 launch(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "导入成功：${successCount} 条记录", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.history_import_success, successCount), Toast.LENGTH_SHORT).show()
                     loadHistory()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 launch(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "导入失败：${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.history_import_failed, e.message), Toast.LENGTH_LONG).show()
                 }
             }
         }

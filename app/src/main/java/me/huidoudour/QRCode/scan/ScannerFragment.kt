@@ -100,9 +100,9 @@ class ScannerFragment : Fragment() {
             if (it.cameraInfo.hasFlashUnit()) {
                 isFlashOn = !isFlashOn
                 it.cameraControl.enableTorch(isFlashOn)
-                Toast.makeText(requireContext(), if (isFlashOn) "闪光灯已开启" else "闪光灯已关闭", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), if (isFlashOn) getString(R.string.flashlight_on) else getString(R.string.flashlight_off), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(requireContext(), "设备不支持闪光灯", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.flashlight_not_supported), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -207,19 +207,19 @@ class ScannerFragment : Fragment() {
                         if (result.isNotEmpty()) {
                             showConfirmationDialog(result, codeType)
                         } else {
-                            Toast.makeText(requireContext(), "未识别到有效二维码", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.no_valid_qr_code), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "图片中未找到二维码或条形码", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.no_qr_code_found), Toast.LENGTH_SHORT).show()
                     }
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
-                    Toast.makeText(requireContext(), "识别失败：${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.recognition_failed, e.message), Toast.LENGTH_LONG).show()
                 }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(requireContext(), "读取图片失败：${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), getString(R.string.read_image_failed, e.message), Toast.LENGTH_LONG).show()
         }
     }
     

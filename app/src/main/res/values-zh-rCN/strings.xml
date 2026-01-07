@@ -38,7 +38,7 @@
     <string name="settings_language_summary">更改应用程序语言</string>
     <string name="settings_about_summary">二维码扫描器</string>
     <string name="language_default">系统默认</string>
-    <string name="language_en">English</string>
+    <string name="language_en">英语</string>
     <string name="language_zh">中文</string>
     <string name="settings_about">关于</string>
     
@@ -49,4 +49,47 @@
     <string name="visit_github">ω寻找我ω</string>
     <string name="generated_qr_code">生成的二维码</string>
     <string name="hello_world">Hello World!</string>
+    <string name="flashlight_on">闪光灯已开启</string>
+    <string name="flashlight_off">闪光灯已关闭</string>
+    <string name="flashlight_not_supported">设备不支持闪光灯</string>
+    <string name="no_valid_qr_code">未识别到有效二维码</string>
+    <string name="no_qr_code_found">图片中未找到二维码或条形码</string>
+    <string name="recognition_failed">识别失败：%1$s</string>
+    <string name="read_image_failed">读取图片失败：%1$s</string>
+    
+    
+    <!-- Export Fragment -->
+    <string name="export_input_required">请输入内容</string>
+    <string name="export_ean13_digit_count_error">EAN-13 条形码需要 12 位数字，你的数据是 %1$d 位。该内容无法生成标准 EAN-13 条形码，请尝试：\n1. 调整内容为 12 位数字\n2. 改用 CODE-128 或二维码生成</string>
+    <string name="export_ean13_digits_only_error">EAN-13 条形码只支持数字（0-9），你的内容包含非数字字符。请尝试：\n1. 删除非数字字符\n2. 改用 CODE-128 或二维码生成</string>
+    <string name="export_ean13_generation_failed">无法生成 EAN-13 条形码：%1$s\n请尝试改用 CODE-128 或二维码生成</string>
+    <string name="export_ean13_format_invalid">EAN-13 条形码格式不有效。请尝试：\n1. 确保输入的是 12 位有效数字\n2. 改用 CODE-128 或二维码生成</string>
+    <string name="export_ean13_validation_error_length">条形码数据不符合规范
+
+EAN-13 需要正好 12 位数字，你的是 %1$d 位
+
+能否撤改或选择使用二维码来存储这个内容？</string>
+    <string name="export_ean13_validation_error_chars">条形码数据不符合规范
+
+EAN-13 只能使用 0-9 数字，你的的数据包含其他字符
+
+能否需要改用二维码来存储这个内容？</string>
+    
+    <!-- History Fragment -->
+    <string name="history_clear_all_title">清空所有记录</string>
+    <string name="history_clear_all_message">确定要删除所有扫描记录吗？此操作不可恢复。</string>
+    <string name="history_final_confirmation_title">最终确认</string>
+    <string name="history_final_confirmation_message">警告：此操作将永久删除所有扫描记录！
+
+这是不可恢复的操作，请谨慎确认。
+
+如需继续，请在下方输入框中输入 \"clear\" 后点击确定。</string>
+    <string name="history_clear_confirmation_hint">请输入 clear 确认</string>
+    <string name="history_cleared_success">已清空所有记录</string>
+    <string name="history_clear_cancelled">输入不正确，清空操作已取消</string>
+    <string name="history_no_records_to_export">没有记录可导出</string>
+    <string name="history_export_failed">导出失败：%1$s</string>
+    <string name="history_export_title">导出记录</string>
+    <string name="history_import_success">导入成功：%1$d 条记录</string>
+    <string name="history_import_failed">导入失败：%1$s</string>
 </resources>
