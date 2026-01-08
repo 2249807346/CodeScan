@@ -61,18 +61,46 @@ jobs:
           # 检查标签是否已存在
           if gh release view ${{ steps.tag.outputs.tag_name }} --json tagName > /dev/null 2>&1; then
             echo "Tag ${{ steps.tag.outputs.tag_name }} already exists, updating pre-release..."
+            # 获取当前日期时间
+            RELEASE_NOTES="## Daily Build
+
+            自动构建的预发布版本，基于最新提交。
+            
+            **构建日期:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+            **提交 SHA:** ${{ github.sha }}
+            
+            ### 注意事项:
+            - 这是包含额外日志的调试版本
+            - 未针对性能或大小进行优化
+            - 仅供测试使用
+            - 此发布使用固定标签 \"daily-build\" 并定期更新"
+                        
             # 更新现有预发布
             gh release edit ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes $'## Daily Build\n\n自动构建的预发布版本，基于最新提交。\n\n**构建日期:** $(date +\'%Y-%m-%d %H:%M:%S UTC\')\n**提交 SHA:** ${{ github.sha }}\n\n### 注意事项:\n- 这是包含额外日志的调试版本\n- 未针对性能或大小进行优化\n- 仅供测试使用\n- 此发布使用固定标签 "daily-build" 并每日更新' \
+              --notes "$RELEASE_NOTES" \
               --draft=false \
               --prerelease=true
           else
             echo "Tag ${{ steps.tag.outputs.tag_name }} does not exist, creating new pre-release..."
+            # 获取当前日期时间
+            RELEASE_NOTES="## Daily Build
+
+            自动构建的预发布版本，基于最新提交。
+            
+            **构建日期:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+            **提交 SHA:** ${{ github.sha }}
+            
+            ### 注意事项:
+            - 这是包含额外日志的调试版本
+            - 未针对性能或大小进行优化
+            - 仅供测试使用
+            - 此发布使用固定标签 \"daily-build\" 并定期更新"
+                        
             # 创建新预发布
             gh release create ${{ steps.tag.outputs.tag_name }} \
               --title "${{ steps.tag.outputs.release_name }}" \
-              --notes $'## Daily Build\n\n自动构建的预发布版本，基于最新提交。\n\n**构建日期:** $(date +\'%Y-%m-%d %H:%M:%S UTC\')\n**提交 SHA:** ${{ github.sha }}\n\n### 注意事项:\n- 这是包含额外日志的调试版本\n- 未针对性能或大小进行优化\n- 仅供测试使用\n- 此发布使用固定标签 "daily-build" 并定期更新' \
+              --notes "$RELEASE_NOTES" \
               --draft=false \
               --prerelease=true
           fi
