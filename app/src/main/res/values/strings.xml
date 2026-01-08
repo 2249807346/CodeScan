@@ -90,6 +90,9 @@ EAN-13 only supports 0-9 digits, your data contains other characters
 Should use QR code to store this content instead?</string>
     
     <!-- History Fragment -->
+    <string name="confirm_delete_title">Confirm Deletion</string>
+    <string name="confirm_delete_message">Are you sure you want to delete this record? This action cannot be undone.</string>
+    <string name="button_confirm">Confirm</string>
     <string name="history_clear_all_title">Clear all records</string>
     <string name="history_clear_all_message">Are you sure you want to delete all scan records? This action cannot be undone.</string>
     <string name="history_final_confirmation_title">Final confirmation</string>

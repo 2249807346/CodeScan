@@ -126,10 +126,23 @@ class HistoryFragment : Fragment() {
     }
 
     private fun deleteScanResult(scanResult: ScanResult) {
-        lifecycleScope.launch {
-            db.scanResultDao().delete(scanResult)
-            loadHistory()
-        }
+        // 添加确认对话框
+        MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
+            .setTitle(getString(R.string.confirm_delete_title))
+            .setMessage(getString(R.string.confirm_delete_message))
+            .setPositiveButton(getString(R.string.button_confirm)) { dialog, _ ->
+                lifecycleScope.launch {
+                    db.scanResultDao().delete(scanResult)
+                    loadHistory()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.button_cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setBackgroundInsetStart(32)
+            .setBackgroundInsetEnd(32)
+            .show()
     }
 
     private fun navigateToExport(scanResult: ScanResult) {
