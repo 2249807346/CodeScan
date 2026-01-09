@@ -27,6 +27,8 @@ import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.os.Environment
+import java.io.IOException
 
 class HistoryFragment : Fragment() {
 
@@ -265,17 +267,53 @@ class HistoryFragment : Fragment() {
     private fun saveAndShareJson(json: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val fileName = "scan_records_${System.currentTimeMillis()}.json"
-                val file = File(requireContext().cacheDir, fileName)
-                val writer = FileWriter(file)
-                writer.write(json)
-                writer.close()
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH:mm", Locale.getDefault())
+                val fileName = "scan_records_${dateFormat.format(Date())}.json"
+                // 同时保存到外部存储的公共目录（供第三方文件管理器访问）和应用私有目录（供DocumentsProvider访问）
+                // 1. 保存到外部存储的公共目录（如果权限允许）
+                var externalFileSaved = false
+                try {
+                    val externalDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
+                    if (!externalDir.exists()) {
+                        if (!externalDir.mkdirs()) {
+                            // 在Android 10+上，可能无法创建目录，尝试使用MediaStore API
+                            // 或者使用应用私有目录
+                            throw IOException("Cannot create external directory on this device")
+                        }
+                    }
+                    val externalFile = File(externalDir, fileName)
+                    val externalWriter = FileWriter(externalFile)
+                    externalWriter.write(json)
+                    externalWriter.close()
+                    externalFileSaved = true
+                } catch (e: Exception) {
+                    // 如果无法保存到公共目录，则只保存到应用私有目录
+                    e.printStackTrace()
+                }
+                
+                // 2. 保存到应用私有目录，以便DocumentsProvider可以访问
+                val docDir = File(requireContext().getExternalFilesDir(null), "data")
+                if (!docDir.exists()) {
+                    if (!docDir.mkdirs()) {
+                        throw IOException("Failed to create internal directory: ${docDir.absolutePath}")
+                    }
+                }
+                val docFile = File(docDir, fileName)
+                val docWriter = FileWriter(docFile)
+                docWriter.write(json)
+                docWriter.close()
+                
+                // 同时也保存到缓存目录用于分享
+                val cacheFile = File(requireContext().cacheDir, fileName)
+                val cacheWriter = FileWriter(cacheFile)
+                cacheWriter.write(json)
+                cacheWriter.close()
                 
                 launch(Dispatchers.Main) {
                     val uri = FileProvider.getUriForFile(
                         requireContext(),
                         "${requireContext().packageName}.fileprovider",
-                        file
+                        cacheFile
                     )
                     
                     val shareIntent = Intent().apply {
@@ -286,6 +324,9 @@ class HistoryFragment : Fragment() {
                     }
                     
                     startActivity(Intent.createChooser(shareIntent, getString(R.string.history_export_title)))
+                    
+                    // 提示用户文件已保存到Documents目录
+                    Toast.makeText(requireContext(), getString(R.string.history_export_saved_to_data), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

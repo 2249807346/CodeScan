@@ -5,6 +5,7 @@ import android.database.MatrixCursor
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
+import android.os.Environment
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import java.io.File
@@ -21,6 +22,8 @@ class DocumentsProvider : DocumentsProvider() {
         const val ROOT_DOCUMENT_ID = "root"
         const val HISTORY_DOCUMENT_ID = "history"
         const val EXPORT_DOCUMENT_ID = "export"
+        const val DATA_DOCUMENT_ID = "data"
+        const val PUBLIC_DATA_DOCUMENT_ID = "public_data"
         
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
@@ -98,6 +101,24 @@ class DocumentsProvider : DocumentsProvider() {
                 row.add(DocumentsContract.Document.COLUMN_SIZE, null)
                 row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, null)
             }
+            DATA_DOCUMENT_ID -> {
+                val row = cursor.newRow()
+                row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, actualDocumentId)
+                row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, "Data")
+                row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE)
+                row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+                row.add(DocumentsContract.Document.COLUMN_SIZE, null)
+                row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, null)
+            }
+            PUBLIC_DATA_DOCUMENT_ID -> {
+                val row = cursor.newRow()
+                row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, actualDocumentId)
+                row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, "Public Data")
+                row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE)
+                row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+                row.add(DocumentsContract.Document.COLUMN_SIZE, null)
+                row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, null)
+            }
             else -> {
                 // 检查是否为子目录或文件
                 val context = context ?: throw FileNotFoundException("Context is null")
@@ -132,6 +153,42 @@ class DocumentsProvider : DocumentsProvider() {
                     return cursor
                 }
                 
+                // 检查是否在应用私有目录的data目录下
+                val dataDir = File(context.getExternalFilesDir(null), "data/$actualDocumentId")
+                if (dataDir.exists()) {
+                    val row = cursor.newRow()
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, actualDocumentId)
+                    row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, dataDir.name)
+                    row.add(DocumentsContract.Document.COLUMN_FLAGS, 0)
+                    row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, 
+                        if (dataDir.isDirectory) DocumentsContract.Document.MIME_TYPE_DIR else getMimeType(dataDir.name))
+                    row.add(DocumentsContract.Document.COLUMN_SIZE, 
+                        if (dataDir.isDirectory) null else dataDir.length())
+                    row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, dataDir.lastModified())
+                    return cursor
+                }
+                
+                // 检查是否在外部存储的CodeScan目录下
+                try {
+                    val codeScanDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
+                    val publicDataFile = File(codeScanDir, actualDocumentId)
+                    if (publicDataFile.exists()) {
+                        val row = cursor.newRow()
+                        row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, actualDocumentId)
+                        row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, publicDataFile.name)
+                        row.add(DocumentsContract.Document.COLUMN_FLAGS, 0)
+                        row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, 
+                            if (publicDataFile.isDirectory) DocumentsContract.Document.MIME_TYPE_DIR else getMimeType(publicDataFile.name))
+                        row.add(DocumentsContract.Document.COLUMN_SIZE, 
+                            if (publicDataFile.isDirectory) null else publicDataFile.length())
+                        row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, publicDataFile.lastModified())
+                        return cursor
+                    }
+                } catch (e: Exception) {
+                    // 如果无法访问外部存储目录，跳过检查
+                    e.printStackTrace()
+                }
+                
                 // 如果都不是，则抛出异常
                 throw FileNotFoundException("Unknown document: $actualDocumentId")
             }
@@ -156,6 +213,8 @@ class DocumentsProvider : DocumentsProvider() {
             ROOT_DOCUMENT_ID -> {
                 addRow(cursor, HISTORY_DOCUMENT_ID, "History", true)
                 addRow(cursor, EXPORT_DOCUMENT_ID, "Export", true)
+                addRow(cursor, DATA_DOCUMENT_ID, "Data", true)
+                addRow(cursor, PUBLIC_DATA_DOCUMENT_ID, "Public Data", true)
             }
             HISTORY_DOCUMENT_ID -> {
                 // 查询历史目录下的文件
@@ -175,6 +234,31 @@ class DocumentsProvider : DocumentsProvider() {
                     exportDir.listFiles()?.forEach { file ->
                         addRow(cursor, file.name, file.name, file.isDirectory)
                     }
+                }
+            }
+            DATA_DOCUMENT_ID -> {
+                // 查询应用私有目录的data目录下的文件
+                val context = context ?: throw FileNotFoundException("Context is null")
+                val dataDir = File(context.getExternalFilesDir(null), "data")
+                if (dataDir.exists() && dataDir.isDirectory) {
+                    dataDir.listFiles()?.forEach { file ->
+                        addRow(cursor, file.name, file.name, file.isDirectory)
+                    }
+                }
+            }
+            PUBLIC_DATA_DOCUMENT_ID -> {
+                // 查询外部存储的CodeScan目录下的文件
+                val context = context ?: throw FileNotFoundException("Context is null")
+                try {
+                    val codeScanDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
+                    if (codeScanDir.exists() && codeScanDir.isDirectory) {
+                        codeScanDir.listFiles()?.forEach { file ->
+                            addRow(cursor, file.name, file.name, file.isDirectory)
+                        }
+                    }
+                } catch (e: Exception) {
+                    // 如果无法访问外部存储目录，跳过列出文件
+                    e.printStackTrace()
                 }
             }
             else -> {
@@ -203,6 +287,8 @@ class DocumentsProvider : DocumentsProvider() {
         val targetFile = when (actualDocumentId) {
             HISTORY_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "history")
             EXPORT_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "export")
+            DATA_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "data")
+            PUBLIC_DATA_DOCUMENT_ID -> File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
             else -> {
                 // 检查是否为history目录下的文件
                 val historyFile = File(context.getExternalFilesDir(null), "history/$actualDocumentId")
@@ -214,9 +300,29 @@ class DocumentsProvider : DocumentsProvider() {
                     val exportFile = File(context.getExternalFilesDir(null), "export/$actualDocumentId")
                     if (exportFile.exists()) {
                         exportFile
-                    } else {
-                        // 对于未知的documentId，抛出异常而不是创建任意路径的文件
-                        throw FileNotFoundException("Unknown document: $actualDocumentId")
+                    } 
+                    // 检查是否为应用私有目录的data目录下的文件
+                    else {
+                        val dataDir = File(context.getExternalFilesDir(null), "data/$actualDocumentId")
+                        if (dataDir.exists()) {
+                            dataDir
+                        }
+                        // 检查是否为外部存储的CodeScan目录下的文件
+                        else {
+                            try {
+                                val codeScanDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
+                                val publicDataFile = File(codeScanDir, actualDocumentId)
+                                if (publicDataFile.exists()) {
+                                    publicDataFile
+                                } else {
+                                    // 对于未知的documentId，抛出异常而不是创建任意路径的文件
+                                    throw FileNotFoundException("Unknown document: $actualDocumentId")
+                                }
+                            } catch (e: Exception) {
+                                // 如果无法访问外部存储目录，跳过检查
+                                throw FileNotFoundException("Unknown document: $actualDocumentId")
+                            }
+                        }
                     }
                 }
             }
@@ -279,6 +385,8 @@ class DocumentsProvider : DocumentsProvider() {
         val parentFile = when (actualParentDocumentId) {
             HISTORY_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "history")
             EXPORT_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "export")
+            DATA_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "data")
+            PUBLIC_DATA_DOCUMENT_ID -> File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
             else -> {
                 // 对于未知的父目录ID，抛出异常
                 throw FileNotFoundException("Unknown parent document: $actualParentDocumentId")
@@ -304,6 +412,8 @@ class DocumentsProvider : DocumentsProvider() {
         val file = when (actualDocumentId) {
             HISTORY_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "history")
             EXPORT_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "export")
+            DATA_DOCUMENT_ID -> File(context.getExternalFilesDir(null), "data")
+            PUBLIC_DATA_DOCUMENT_ID -> File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
             else -> {
                 // 对于未知的documentId，抛出异常
                 throw FileNotFoundException("Unknown document: $actualDocumentId")
