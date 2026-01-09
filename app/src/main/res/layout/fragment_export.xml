@@ -59,7 +59,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/hint_export_input_ean13"
+                        android:text="@string/hint_export_input_unified"
                         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
                         android:textColor="?attr/colorOnSurface"
                         android:layout_marginBottom="16dp" />
@@ -82,7 +82,8 @@
                             android:layout_height="wrap_content"
                             android:inputType="text"
                             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="?attr/colorOnSurface"
+                            android:contentDescription="@string/hint_export_input_unified" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 

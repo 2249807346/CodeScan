@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CodeScan</string>
+    <string name="app_version">v3.0</string>>
     <string name="toast_ean13_length_error">Input must be 12 digits long for EAN-13</string>
     <string name="toast_generation_error">Error generating code: %1$s</string>
     <string name="toast_generic_error">Error: %1$s</string>
@@ -17,9 +18,10 @@
     <string name="title_scan">Scan</string>
     <string name="title_history">History</string>
     <string name="title_export">Export</string>
-    <string name="hint_export_input_ean13">Enter 12 digits for EAN-13 barcode</string>
-    <string name="hint_export_input_code128">Enter text for CODE-128 barcode</string>
-    <string name="hint_export_input_qr">Enter text for QR code</string>
+    <string name="hint_export_input_ean13">Please enter EAN-13 text</string>
+    <string name="hint_export_input_code128">Please enter Code-128 text</string>
+    <string name="hint_export_input_qr">Please enter QR code text</string>
+    <string name="hint_export_input_unified">Please enter text to export</string>
     <string name="button_generate_ean13">Generate EAN-13 Barcode</string>
     <string name="button_generate_code128">Generate CODE-128</string>
     <string name="button_generate_qr">Generate QR Code from any text</string>
@@ -32,6 +34,8 @@
     
     <!-- Settings Page -->
     <string name="title_settings">Settings</string>
+    <string name="hint_content_edit">Content</string>
+    <string name="hint_remark_edit">Remark</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_summary">Change the application language</string>
     <string name="settings_about_summary">CodeScan is a QR code and barcode scanner application</string>
@@ -56,7 +60,7 @@
     <string name="no_qr_code_found">No QR code or barcode found in the image</string>
     <string name="recognition_failed">Recognition failed: %1$s</string>
     <string name="read_image_failed">Failed to read image: %1$s</string>
-    <string name="export_input_required">Please enter content</string>
+    <string name="export_input_required">Please enter text to export</string>
     <string name="export_ean13_digit_count_error">EAN-13 barcode requires 12 digits, your data has %1$d digits. This content cannot generate a standard EAN-13 barcode, please try: 1. Adjust content to 12 digits 2. Use CODE-128 or QR code instead</string>
     <string name="export_ean13_digits_only_error">EAN-13 barcode only supports digits (0-9), your content contains non-digit characters. Please try: 1. Remove non-digit characters 2. Use CODE-128 or QR code instead</string>
     <string name="export_ean13_generation_failed">Unable to generate EAN-13 barcode: %1$s Please try using CODE-128 or QR code instead</string>

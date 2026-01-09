@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.huidoudour.QRCode.scan.databinding.FragmentSettingsBinding
 
+
 class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
@@ -27,6 +28,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         updateLanguageDisplay()
+        updateVersionDisplay()
         
         binding.languageSettingItem.setOnClickListener {
             showLanguageSelectionDialog()
@@ -41,6 +43,19 @@ class SettingsFragment : Fragment() {
     private fun updateLanguageDisplay() {
         val currentLanguage = getCurrentLanguage()
         binding.currentLanguage.text = currentLanguage
+    }
+    
+    private fun updateVersionDisplay() {
+        val versionName = try {
+            val packageInfo = requireContext().packageManager
+                .getPackageInfo(requireContext().packageName, 0)
+            packageInfo.versionName
+        } catch (e: Exception) {
+            "Unknown"
+        }
+        
+        // 更新版本号显示
+        binding.versionText.text = "v$versionName"
     }
 
     private fun getCurrentLanguage(): String {

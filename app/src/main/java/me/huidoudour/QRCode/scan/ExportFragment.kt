@@ -49,6 +49,7 @@ class ExportFragment : Fragment() {
         }
 
         binding.generateEan13Button.setOnClickListener {
+            binding.textInputLayout.hint = getString(R.string.hint_export_input_ean13)
             generateCode(BarcodeFormat.EAN_13)
         }
         
@@ -66,7 +67,14 @@ class ExportFragment : Fragment() {
     private fun generateCode(format: BarcodeFormat) {
         val text = binding.inputText.text.toString()
         if (text.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.export_input_required), Toast.LENGTH_SHORT).show()
+            val hintText = when (format) {
+                BarcodeFormat.EAN_13 -> getString(R.string.hint_export_input_ean13)
+                BarcodeFormat.CODE_128 -> getString(R.string.hint_export_input_code128)
+                BarcodeFormat.QR_CODE -> getString(R.string.hint_export_input_qr)
+                else -> getString(R.string.export_input_required)
+            }
+            Toast.makeText(requireContext(), hintText, Toast.LENGTH_SHORT).show()
+            binding.inputText.requestFocus()
             return
         }
 

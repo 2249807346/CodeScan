@@ -11,12 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:hint="@string/hint_remark_edit"
         app:boxBackgroundMode="outline"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        app:hintTextColor="?attr/colorOnSurfaceVariant"
+        app:hintTextColor="?attr/colorPrimary"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -25,7 +26,8 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:textColor="?attr/colorOnSurface" />
+            android:textColor="?attr/colorOnSurface"
+            android:contentDescription="@string/hint_remark_edit" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
