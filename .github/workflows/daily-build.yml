@@ -80,7 +80,8 @@ jobs:
               --title "${{ steps.tag.outputs.release_name }}" \
               --notes "$RELEASE_NOTES" \
               --draft=false \
-              --prerelease=true
+              --prerelease=true \
+              --latest=true
           else
             echo "Tag ${{ steps.tag.outputs.tag_name }} does not exist, creating new pre-release..."
             # 获取当前日期时间
@@ -102,7 +103,8 @@ jobs:
               --title "${{ steps.tag.outputs.release_name }}" \
               --notes "$RELEASE_NOTES" \
               --draft=false \
-              --prerelease=true
+              --prerelease=true \
+              --latest=true
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
