@@ -1,16 +1,15 @@
 package me.huidoudour.QRCode.scan
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -20,8 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -30,7 +27,7 @@ import me.huidoudour.QRCode.scan.databinding.FragmentScannerBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class ScannerFragment : Fragment() {
+class QuickScanFragment : Fragment() {
 
     private var _binding: FragmentScannerBinding? = null
     private val binding get() = _binding!!
@@ -123,14 +120,12 @@ class ScannerFragment : Fragment() {
                 if (isScanning) {
                     isScanning = false
                     requireActivity().runOnUiThread {
-                        showConfirmationDialog(result, codeType)
+                        handleScanResult(result, codeType)
                     }
                 }
             }
 
             // 计算扫描框的坐标
-            // 由于 ML Kit 的条形码坐标已经在图像坐标系中，
-            // 我们需要根据预览和图像尺寸的比例来设置扫描框边界
             binding.previewView.post {
                 val previewWidth = binding.previewView.width
                 val previewHeight = binding.previewView.height
@@ -160,57 +155,26 @@ class ScannerFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun showConfirmationDialog(result: String, codeType: String) {
-        // 检查是否是二维码且为web链接
-        if (codeType == "QR_CODE" && isWebLink(result)) {
-            // 显示选择对话框：打开链接或保存
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-                .setTitle(getString(R.string.dialog_title_scan_result))
-                .setMessage(result)
-                .setPositiveButton(getString(R.string.button_open_link)) { dialog, _ ->
-                    openWebLink(result)
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNegativeButton(getString(R.string.button_save)) { dialog, _ ->
-                    saveScanResult(result, codeType, "")
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNeutralButton(getString(R.string.button_rescan)) { dialog, _ ->
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setBackgroundInsetStart(32)
-                .setBackgroundInsetEnd(32)
-                .setCancelable(false)
-                .show()
-        } else {
-            // 原有的保存逻辑
-            val dialogView = layoutInflater.inflate(R.layout.dialog_scan_result, null)
-            val textInputLayout = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
-            val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)
-            
-            textInputLayout.hint = getString(R.string.hint_remark_optional)
-            
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-                .setTitle(getString(R.string.dialog_title_scan_result))
-                .setMessage(result)
-                .setView(dialogView)
-                .setPositiveButton(getString(R.string.button_save)) { dialog, _ ->
-                    val remark = remarkEditText.text.toString()
-                    saveScanResult(result, codeType, remark)
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNegativeButton(getString(R.string.button_rescan)) { dialog, _ ->
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setBackgroundInsetStart(32)
-                .setBackgroundInsetEnd(32)
-                .setCancelable(false)
-                .show()
+    /**
+     * 处理扫描结果 - 根据您的需求定制
+     * 1. 二维码且为web链接：直接跳转浏览器
+     * 2. 二维码非web链接：直接保存
+     * 3. 条形码：直接保存
+     */
+    private fun handleScanResult(result: String, codeType: String) {
+        when {
+            // 二维码且为web链接：直接跳转浏览器
+            codeType == "QR_CODE" && isWebLink(result) -> {
+                openWebLink(result)
+                // 自动恢复扫描
+                isScanning = true
+            }
+            // 其他情况：直接保存并显示提示
+            else -> {
+                saveScanResult(result, codeType, "")
+                // 自动恢复扫描
+                isScanning = true
+            }
         }
     }
     
@@ -225,11 +189,12 @@ class ScannerFragment : Fragment() {
      * 使用系统浏览器打开web链接
      */
     private fun openWebLink(url: String) {
-        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-        intent.data = android.net.Uri.parse(url)
-        intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(url)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         if (intent.resolveActivity(requireContext().packageManager) != null) {
             requireContext().startActivity(intent)
+            Toast.makeText(requireContext(), getString(R.string.opening_link), Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(requireContext(), getString(R.string.no_browser_found), Toast.LENGTH_SHORT).show()
         }
@@ -260,7 +225,7 @@ class ScannerFragment : Fragment() {
                         val codeType = getCodeTypeName(barcode.format)
                         
                         if (result.isNotEmpty()) {
-                            showConfirmationDialog(result, codeType)
+                            handleScanResult(result, codeType)
                         } else {
                             Toast.makeText(requireContext(), getString(R.string.no_valid_qr_code), Toast.LENGTH_SHORT).show()
                         }
