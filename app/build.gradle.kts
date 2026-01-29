@@ -42,6 +42,21 @@ android {
         }
     }
 
+    signingConfigs {
+        create("config") {
+            // 如果在工作流环境中使用命令行参数传入签名信息，则使用这些参数
+            if (System.getProperty("android.injected.signing.store.file") != null) {
+                storeFile = file(System.getProperty("android.injected.signing.store.file"))
+                storePassword = System.getProperty("android.injected.signing.store.password")
+                keyAlias = System.getProperty("android.injected.signing.key.alias")
+                keyPassword = System.getProperty("android.injected.signing.key.password")
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = false
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -50,9 +65,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("config")
         }
         debug {
             isMinifyEnabled = false
+            // Debug模式只在有签名参数时才使用签名配置
+            if (System.getProperty("android.injected.signing.store.file") != null) {
+                signingConfig = signingConfigs.getByName("config")
+            }
         }
     }
     packaging {
