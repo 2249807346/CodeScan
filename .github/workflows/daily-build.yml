@@ -56,11 +56,19 @@ jobs:
           echo "tag_name=daily-build" >> $GITHUB_OUTPUT
           echo "release_name=Daily Build" >> $GITHUB_OUTPUT
 
-      - name: Check if tag exists and create/update pre-release
+      - name: Move tag to latest commit
         run: |
-          # 检查标签是否已存在
+          # 创建/更新轻量级标签到当前提交
+          git tag -f ${{ steps.tag.outputs.tag_name }}
+          git push -f origin ${{ steps.tag.outputs.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if release exists and create/update pre-release
+        run: |
+          # 检查发布是否已存在
           if gh release view ${{ steps.tag.outputs.tag_name }} --json tagName > /dev/null 2>&1; then
-            echo "Tag ${{ steps.tag.outputs.tag_name }} already exists, updating pre-release..."
+            echo "Release for tag ${{ steps.tag.outputs.tag_name }} already exists, updating pre-release..."
             # 获取当前日期时间
             RELEASE_NOTES="## Daily Build
             
@@ -80,9 +88,10 @@ jobs:
               --title "${{ steps.tag.outputs.release_name }}" \
               --notes "$RELEASE_NOTES" \
               --draft=false \
-              --prerelease=true
+              --prerelease=true \
+              --latest=true
           else
-            echo "Tag ${{ steps.tag.outputs.tag_name }} does not exist, creating new pre-release..."
+            echo "Release for tag ${{ steps.tag.outputs.tag_name }} does not exist, creating new pre-release..."
             # 获取当前日期时间
             RELEASE_NOTES="## Daily Build
             
@@ -102,7 +111,8 @@ jobs:
               --title "${{ steps.tag.outputs.release_name }}" \
               --notes "$RELEASE_NOTES" \
               --draft=false \
-              --prerelease=true
+              --prerelease=true \
+              --latest=true
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

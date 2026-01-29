@@ -98,6 +98,11 @@ EAN-13 只能使用 0-9 数字，你的的数据包含其他字符
     <string name="history_export_failed">导出失败：%1$s</string>
     <string name="history_export_title">导出记录</string>
     <string name="history_import_success">导入成功：%1$d 条记录</string>
+    <string name="button_open_link">打开链接</string>
+    <string name="no_browser_found">未找到浏览器应用</string>
     <string name="history_import_failed">导入失败：%1$s</string>
-    <string name="history_export_saved_to_data">文件已保存到Data目录</string>
+    <string name="history_export_saved_to_data">文件已保存到外部存储</string>
+    
+    <!-- Quick Scan Fragment -->
+    <string name="opening_link">正在打开链接...</string>
 </resources>

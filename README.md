@@ -19,6 +19,6 @@
 
 ## 部分设计参考和依赖
 - [huidoudour/Installer](https://github.com/huidoudour/Installer)<br>
-- 2<br>
+- [L-JINBIN/MTDataFilesProvider](https://github.com/L-JINBIN/MTDataFilesProvider)<br>
 - 3<br>
 - 4<br>

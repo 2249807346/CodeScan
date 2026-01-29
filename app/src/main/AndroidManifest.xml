@@ -25,6 +25,34 @@
             </intent-filter>
         </activity>
         
+        <!-- 快速扫描Activity -->
+        <activity
+            android:name=".QuickScanActivity"
+            android:exported="true"
+            android:icon="@drawable/ic_icon_new_foreground"
+            android:theme="@style/Theme.CodeScan" />
+        
+        <!-- 独立扫描Activity，直接使用扫描布局 -->
+        <activity
+            android:name=".ScannerActivity"
+            android:exported="true"
+            android:icon="@drawable/ic_scan_with_background"
+            android:label="@string/title_scan"
+            android:theme="@style/Theme.CodeScan" />
+        
+        <!-- 新的独立启动Activity，使用ic_scan_with_background.xml图标 -->
+        <activity
+            android:name=".NewScannerActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_icon_new"
+            android:label="@string/title_scan"
+            android:theme="@style/Theme.CodeScan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
         <activity
             android:name=".MeActivity"
             android:exported="false"
@@ -40,16 +68,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
         
-        <provider
-            android:name=".DocumentsProvider"
-            android:authorities="me.huidoudour.QRCode.scan.documents"
-            android:exported="true"
-            android:grantUriPermissions="true"
-            android:permission="android.permission.MANAGE_DOCUMENTS">
-            <intent-filter>
-                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
-            </intent-filter>
-        </provider>
+
 
     </application>
 
