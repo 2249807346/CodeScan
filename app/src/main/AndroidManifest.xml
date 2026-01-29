@@ -26,7 +26,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        
+        <!-- 快速扫描Activity，具有独立桌面图标 -->
+        <activity
+            android:name=".QuickScanActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_icon_new"
+            android:theme="@style/Theme.CodeScan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
         <activity
             android:name=".MeActivity"
             android:exported="false"
