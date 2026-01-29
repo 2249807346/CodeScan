@@ -105,4 +105,8 @@ dependencies {
     // ZXing二维码生成库
     implementation("com.google.zxing:core:3.5.1")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    //MT管理器文件提供器
+    debugImplementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
+    implementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
 }

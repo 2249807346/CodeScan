@@ -35,6 +35,7 @@ class QuickScanFragment : Fragment() {
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var db: AppDatabase
+    private lateinit var jsonFileManager: JsonFileManager
     private var isScanning = true
     private var camera: Camera? = null
     private var isFlashOn = false
@@ -66,6 +67,7 @@ class QuickScanFragment : Fragment() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraExecutor = Executors.newSingleThreadExecutor()
         db = AppDatabase.getDatabase(requireContext())
+        jsonFileManager = JsonFileManager(requireContext())
         
         setupToolbarMenu()
 
@@ -201,11 +203,20 @@ class QuickScanFragment : Fragment() {
     }
     
     /**
-     * 保存扫描结果到数据库
+     * 保存扫描结果到数据库和私有目录
      */
     private fun saveScanResult(result: String, codeType: String, remark: String) {
         lifecycleScope.launch {
-            db.scanResultDao().insert(ScanResult(content = result, remark = remark, codeType = codeType, timestamp = System.currentTimeMillis()))
+            val scanResult = ScanResult(content = result, remark = if (remark.isEmpty()) null else remark, codeType = codeType, timestamp = System.currentTimeMillis())
+            db.scanResultDao().insert(scanResult)
+            
+            // 同时保存到私有目录
+            try {
+                jsonFileManager.saveScanResultToPrivateDir(scanResult)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            
             requireActivity().runOnUiThread {
                 Toast.makeText(requireContext(), getString(R.string.toast_saved), Toast.LENGTH_SHORT).show()
             }

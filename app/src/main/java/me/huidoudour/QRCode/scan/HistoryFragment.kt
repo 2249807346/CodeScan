@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.huidoudour.QRCode.scan.databinding.FragmentHistoryBinding
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileWriter
@@ -29,6 +30,8 @@ import java.util.Date
 import java.util.Locale
 import android.os.Environment
 import java.io.IOException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 class HistoryFragment : Fragment() {
 
@@ -37,6 +40,7 @@ class HistoryFragment : Fragment() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: HistoryAdapter
+    private lateinit var jsonFileManager: JsonFileManager
     
     // 文件选择器
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -54,6 +58,7 @@ class HistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         db = AppDatabase.getDatabase(requireContext())
+        jsonFileManager = JsonFileManager(requireContext())
 
         adapter = HistoryAdapter(emptyList()) { scanResult, action ->
             when (action) {
@@ -94,6 +99,13 @@ class HistoryFragment : Fragment() {
         lifecycleScope.launch {
             val scanResults = db.scanResultDao().getAll()
             adapter.updateData(scanResults)
+            
+            // 同步保存到私有目录
+            try {
+                jsonFileManager.saveAllScanResultsToPrivateDir(scanResults)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -114,7 +126,16 @@ class HistoryFragment : Fragment() {
                 val newContent = contentEditText.text.toString()
                 val newRemark = remarkEditText.text.toString()
                 lifecycleScope.launch {
-                    db.scanResultDao().update(scanResult.copy(content = newContent, remark = newRemark))
+                    val updatedScanResult = scanResult.copy(content = newContent, remark = newRemark)
+                    db.scanResultDao().update(updatedScanResult)
+                    
+                    // 同时保存到私有目录
+                    try {
+                        jsonFileManager.saveScanResultToPrivateDir(updatedScanResult)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    
                     loadHistory()
                 }
                 dialog.dismiss()
@@ -135,6 +156,8 @@ class HistoryFragment : Fragment() {
             .setPositiveButton(getString(R.string.button_confirm)) { dialog, _ ->
                 lifecycleScope.launch {
                     db.scanResultDao().delete(scanResult)
+                    
+                    // 同步更新私有目录
                     loadHistory()
                 }
                 dialog.dismiss()
@@ -200,6 +223,8 @@ class HistoryFragment : Fragment() {
                 if (input == "clear") {
                     lifecycleScope.launch {
                         db.scanResultDao().deleteAll()
+                        
+                        // 同步更新私有目录
                         loadHistory()
                         Toast.makeText(requireContext(), getString(R.string.history_cleared_success), Toast.LENGTH_SHORT).show()
                     }
@@ -238,94 +263,57 @@ class HistoryFragment : Fragment() {
     
     private fun convertToJson(scanResults: List<ScanResult>): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val jsonArray = JSONArray()
         
-        val json = StringBuilder()
-        json.append("[\n")
-        
-        scanResults.forEachIndexed { index, scanResult ->
-            val content = scanResult.content.replace("\\", "\\\\").replace("\"", "\\\"")
-            val remark = (scanResult.remark ?: "").replace("\\", "\\\\").replace("\"", "\\\"")
-            val codeType = scanResult.codeType.replace("\\", "\\\\").replace("\"", "\\\"")
-            
-            json.append("  {\n")
-            json.append("    \"数据\": \"${content}\",\n")
-            json.append("    \"类型\": \"${codeType}\",\n")
-            json.append("    \"备注\": \"${remark}\",\n")
-            json.append("    \"时间\": \"${dateFormat.format(Date(scanResult.timestamp))}\"\n")
-            json.append("  }")
-            
-            if (index < scanResults.size - 1) {
-                json.append(",")
+        scanResults.forEach { scanResult ->
+            val jsonObject = JSONObject().apply {
+                put("数据", scanResult.content)
+                put("类型", scanResult.codeType)
+                put("备注", scanResult.remark ?: "")
+                put("时间", dateFormat.format(Date(scanResult.timestamp)))
             }
-            json.append("\n")
+            jsonArray.put(jsonObject)
         }
         
-        json.append("]")
-        return json.toString()
+        return jsonArray.toString(2)
     }
     
     private fun saveAndShareJson(json: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH:mm", Locale.getDefault())
-                val fileName = "scan_records_${dateFormat.format(Date())}.json"
-                // 同时保存到外部存储的公共目录（供第三方文件管理器访问）和应用私有目录（供DocumentsProvider访问）
-                // 1. 保存到外部存储的公共目录（如果权限允许）
-                var externalFileSaved = false
-                try {
-                    val externalDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "CodeScan")
-                    if (!externalDir.exists()) {
-                        if (!externalDir.mkdirs()) {
-                            // 在Android 10+上，可能无法创建目录，尝试使用MediaStore API
-                            // 或者使用应用私有目录
-                            throw IOException("Cannot create external directory on this device")
-                        }
-                    }
-                    val externalFile = File(externalDir, fileName)
-                    val externalWriter = FileWriter(externalFile)
-                    externalWriter.write(json)
-                    externalWriter.close()
-                    externalFileSaved = true
-                } catch (e: Exception) {
-                    // 如果无法保存到公共目录，则只保存到应用私有目录
-                    e.printStackTrace()
+                // 从私有目录获取最新文件
+                val autoSaveFile = jsonFileManager.getFileInPrivateDir()
+                if (!autoSaveFile.exists()) {
+                    // 如果私有目录文件不存在，保存当前数据
+                    jsonFileManager.saveAllScanResultsToPrivateDir(db.scanResultDao().getAll())
                 }
                 
-                // 2. 保存到应用私有目录，以便DocumentsProvider可以访问
-                val docDir = File(requireContext().getExternalFilesDir(null), "data")
-                if (!docDir.exists()) {
-                    if (!docDir.mkdirs()) {
-                        throw IOException("Failed to create internal directory: ${docDir.absolutePath}")
-                    }
+                // 创建临时导出文件
+                val exportFileName = jsonFileManager.getExportFileName()
+                val exportFile = File(requireContext().cacheDir, exportFileName)
+                
+                // 将当前数据写入临时导出文件
+                FileWriter(exportFile).use { writer ->
+                    writer.write(json)
                 }
-                val docFile = File(docDir, fileName)
-                val docWriter = FileWriter(docFile)
-                docWriter.write(json)
-                docWriter.close()
-                
-                // 同时也保存到缓存目录用于分享
-                val cacheFile = File(requireContext().cacheDir, fileName)
-                val cacheWriter = FileWriter(cacheFile)
-                cacheWriter.write(json)
-                cacheWriter.close()
-                
+                    
                 launch(Dispatchers.Main) {
                     val uri = FileProvider.getUriForFile(
                         requireContext(),
                         "${requireContext().packageName}.fileprovider",
-                        cacheFile
+                        exportFile
                     )
-                    
+                        
                     val shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "application/json"
                         putExtra(Intent.EXTRA_STREAM, uri)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    
+                        
                     startActivity(Intent.createChooser(shareIntent, getString(R.string.history_export_title)))
-                    
-                    // 提示用户文件已保存到Documents目录
+                        
+                    // 提示用户文件已保存到外部存储目录
                     Toast.makeText(requireContext(), getString(R.string.history_export_saved_to_data), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
@@ -390,6 +378,13 @@ class HistoryFragment : Fragment() {
                             timestamp = timestamp
                         )
                         db.scanResultDao().insert(scanResult)
+                        
+                        // 同步保存到私有目录
+                        try {
+                            jsonFileManager.saveScanResultToPrivateDir(scanResult)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                         successCount++
                     }
                 }
