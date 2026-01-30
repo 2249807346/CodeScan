@@ -19,7 +19,8 @@
         android:theme="@style/Theme.CodeScan">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,12 +28,15 @@
             </intent-filter>
         </activity>
         
-        <!-- 快速扫描Activity，具有独立桌面图标 -->
+        <!-- 快速扫描Activity，具有独立桌面图标和独立任务栈-->
         <activity
             android:name=".QuickScanActivity"
             android:exported="true"
             android:icon="@mipmap/ic_icon_new"
-            android:theme="@style/Theme.CodeScan">
+            android:theme="@style/Theme.CodeScan"
+            android:roundIcon="@mipmap/ic_icon_new_round"
+            android:launchMode="singleTask"
+            android:taskAffinity="me.huidoudour.QRCode.scan.quickscan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
