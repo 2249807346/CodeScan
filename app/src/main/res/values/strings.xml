@@ -47,10 +47,10 @@
     <string name="settings_about">About</string>
     
     <!-- About Page -->
-    <string name="about_description">You protect the world, I protect you</string>
+    <string name="about_description">你保护世界，我保护你</string>
     <string name="about_features">Supports QR codes, EAN-13, CODE-128 and more formats</string>
-    <string name="about_developer">Hello, I am huidoudour</string>
-    <string name="visit_github">Find me on GitHub</string>
+    <string name="about_developer">亻尔女子，我是huidoudour（慧兜兜）</string>
+    <string name="visit_github">ω寻找我ω</string>
     <string name="generated_qr_code">Generated QR Code</string>
     <string name="hello_world">Hello World!</string>
     <string name="flashlight_on">Flashlight turned on</string>
