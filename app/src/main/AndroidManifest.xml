@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="AllFilesAccessPolicy,ScopedStorage" />
     <uses-feature android:name="android.hardware.camera.any" />
 
     <application
@@ -17,7 +19,8 @@
         android:theme="@style/Theme.CodeScan">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,28 +28,15 @@
             </intent-filter>
         </activity>
         
-        <!-- 快速扫描Activity -->
+        <!-- 快速扫描Activity，具有独立桌面图标和独立任务栈-->
         <activity
             android:name=".QuickScanActivity"
             android:exported="true"
-            android:icon="@drawable/ic_icon_new_foreground"
-            android:theme="@style/Theme.CodeScan" />
-        
-        <!-- 独立扫描Activity，直接使用扫描布局 -->
-        <activity
-            android:name=".ScannerActivity"
-            android:exported="true"
-            android:icon="@drawable/ic_scan_with_background"
-            android:label="@string/title_scan"
-            android:theme="@style/Theme.CodeScan" />
-        
-        <!-- 新的独立启动Activity，使用ic_scan_with_background.xml图标 -->
-        <activity
-            android:name=".NewScannerActivity"
-            android:exported="true"
             android:icon="@mipmap/ic_icon_new"
-            android:label="@string/title_scan"
-            android:theme="@style/Theme.CodeScan">
+            android:theme="@style/Theme.CodeScan"
+            android:roundIcon="@mipmap/ic_icon_new_round"
+            android:launchMode="singleTask"
+            android:taskAffinity="me.huidoudour.QRCode.scan.quickscan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

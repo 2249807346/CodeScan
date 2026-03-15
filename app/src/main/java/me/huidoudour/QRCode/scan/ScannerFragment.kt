@@ -163,57 +163,31 @@ class ScannerFragment : Fragment() {
     }
 
     private fun showConfirmationDialog(result: String, codeType: String) {
-        // 检查是否是二维码且为web链接
-        if (codeType == "QR_CODE" && isWebLink(result)) {
-            // 显示选择对话框：打开链接或保存
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-                .setTitle(getString(R.string.dialog_title_scan_result))
-                .setMessage(result)
-                .setPositiveButton(getString(R.string.button_open_link)) { dialog, _ ->
-                    openWebLink(result)
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNegativeButton(getString(R.string.button_save)) { dialog, _ ->
-                    saveScanResult(result, codeType, "")
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNeutralButton(getString(R.string.button_rescan)) { dialog, _ ->
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setBackgroundInsetStart(32)
-                .setBackgroundInsetEnd(32)
-                .setCancelable(false)
-                .show()
-        } else {
-            // 原有的保存逻辑
-            val dialogView = layoutInflater.inflate(R.layout.dialog_scan_result, null)
-            val textInputLayout = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
-            val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)
-            
-            textInputLayout.hint = getString(R.string.hint_remark_optional)
-            
-            MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
-                .setTitle(getString(R.string.dialog_title_scan_result))
-                .setMessage(result)
-                .setView(dialogView)
-                .setPositiveButton(getString(R.string.button_save)) { dialog, _ ->
-                    val remark = remarkEditText.text.toString()
-                    saveScanResult(result, codeType, remark)
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setNegativeButton(getString(R.string.button_rescan)) { dialog, _ ->
-                    isScanning = true
-                    dialog.dismiss()
-                }
-                .setBackgroundInsetStart(32)
-                .setBackgroundInsetEnd(32)
-                .setCancelable(false)
-                .show()
-        }
+        // 显示选择对话框：保存或重扫（移除打开链接功能）
+        val dialogView = layoutInflater.inflate(R.layout.dialog_scan_result, null)
+        val textInputLayout = dialogView.findViewById<TextInputLayout>(R.id.textInputLayout)
+        val remarkEditText = dialogView.findViewById<TextInputEditText>(R.id.remarkEditText)
+        
+        textInputLayout.hint = getString(R.string.hint_remark_optional)
+        
+        MaterialAlertDialogBuilder(requireContext(), R.style.Theme_CodeScan_Dialog)
+            .setTitle(getString(R.string.dialog_title_scan_result))
+            .setMessage(result)
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.button_save)) { dialog, _ ->
+                val remark = remarkEditText.text.toString()
+                saveScanResult(result, codeType, remark)
+                isScanning = true
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.button_rescan)) { dialog, _ ->
+                isScanning = true
+                dialog.dismiss()
+            }
+            .setBackgroundInsetStart(32)
+            .setBackgroundInsetEnd(32)
+            .setCancelable(false)
+            .show()
     }
     
     /**
